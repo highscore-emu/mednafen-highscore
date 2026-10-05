@@ -974,7 +974,7 @@ mednafen_core_run_frame (HsCore *core)
       uint32 cr = vce.CR;
 
       gboolean strip_colorburst = (cr & (1 << 7)) > 0;
-      gboolean blur = (cr & (1 << 2)) > 0;
+      gboolean alternate_colorburst = (cr & (1 << 2)) > 0;
 
       float w = width;
 
@@ -989,10 +989,12 @@ mednafen_core_run_frame (HsCore *core)
 
       hs_software_context_set_colorburst (self->context, cycle_length, 0.5, 0.25 + self->colorburst_offset);
 
-      self->colorburst_offset += (mode == HS_INTERLACING_NONE) ? 0.5 : 0.25;
+      if (alternate_colorburst) {
+        self->colorburst_offset += (mode == HS_INTERLACING_NONE) ? 0.5 : 0.25;
 
-      if (self->colorburst_offset > 0.9)
-        self->colorburst_offset = 0;
+        if (self->colorburst_offset > 0.9)
+          self->colorburst_offset = 0;
+      }
     } else {
       if (hs_core_get_region (core) == HS_REGION_PAL) {
         hs_software_context_set_colorburst (self->context, width * 3.0 / 640.0, 0.25, self->colorburst_offset);
