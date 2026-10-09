@@ -1000,6 +1000,9 @@ mednafen_core_run_frame (HsCore *core)
       if (hs_core_get_region (core) == HS_REGION_PAL) {
         hs_software_context_set_colorburst (self->context, width * 3.0 / 640.0, 0.25, self->colorburst_offset);
 
+        if (self->colorburst_offset > 0.9)
+          self->colorburst_offset--;
+
         self->colorburst_offset += (mode == HS_INTERLACING_NONE) ? 0.25 : 0.125;
 
         if (self->colorburst_offset > 0.9)
