@@ -39,6 +39,7 @@ struct _MednafenCore
   gboolean pce_use_sgx;
 
   float colorburst_offset;
+  int pal_v_phase;
 
   int top_overscan_n;
   int bottom_overscan_n;
@@ -1002,7 +1003,12 @@ mednafen_core_run_frame (HsCore *core)
         self->colorburst_offset += (mode == HS_INTERLACING_NONE) ? 0.25 : 0.125;
 
         if (self->colorburst_offset > 0.9)
-          self->colorburst_offset = 0.0;
+          self->colorburst_offset--;
+
+        if (mode != HS_INTERLACING_ODD_FIELD)
+          self->pal_v_phase = (self->pal_v_phase + 1) % 2;
+
+        self->colorburst_offset += self->pal_v_phase;
       } else {
         hs_software_context_set_colorburst (self->context, width * 3.0 / 512.0, 0.5, self->colorburst_offset);
 
