@@ -990,8 +990,8 @@ mednafen_core_run_frame (HsCore *core)
 
       hs_software_context_set_colorburst (self->context, cycle_length, 0.5, 0.25 + self->colorburst_offset);
 
-      if (alternate_colorburst && mode != HS_INTERLACING_ODD_FIELD) {
-        self->colorburst_offset += (mode == HS_INTERLACING_NONE) ? 0.5 : 0.25;
+      if (alternate_colorburst && mode != HS_INTERLACING_EVEN_FIELD) {
+        self->colorburst_offset += 0.5;
 
         if (self->colorburst_offset > 0.9)
           self->colorburst_offset = 0;
@@ -1000,7 +1000,7 @@ mednafen_core_run_frame (HsCore *core)
       if (hs_core_get_region (core) == HS_REGION_PAL) {
         hs_software_context_set_colorburst (self->context, width * 3.0 / 640.0, 0.25, self->colorburst_offset);
 
-        if (mode != HS_INTERLACING_ODD_FIELD) {
+        if (mode != HS_INTERLACING_EVEN_FIELD) {
           if (self->colorburst_offset > 0.9)
             self->colorburst_offset--;
 
@@ -1015,7 +1015,7 @@ mednafen_core_run_frame (HsCore *core)
       } else {
         hs_software_context_set_colorburst (self->context, width * 3.0 / 512.0, 0.5, self->colorburst_offset);
 
-        if (mode != HS_INTERLACING_ODD_FIELD) {
+        if (mode != HS_INTERLACING_EVEN_FIELD) {
           self->colorburst_offset += 0.5;
 
           if (self->colorburst_offset > 0.9)
