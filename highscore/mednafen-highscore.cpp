@@ -970,18 +970,20 @@ mednafen_core_run_frame (HsCore *core)
 
     hs_software_context_set_interlacing (self->context, mode);
 
+    float w = width;
+
+    // Mednafen rounds a few widths, so we need to normalize them
+    if (width == 341)
+      w = 341 + 1.0 / 3.0;
+    else if (width == 682)
+      w = 682 + 2.0 / 3.0;
+
     if (base_platform == HS_PLATFORM_PC_ENGINE) {
       // https://datacrystal.tcrf.net/wiki/VDC_Programmers_Reference_(Turbo-Grafx_16)#$0400_-_CR_-_Control_Register
       uint32 cr = vce.CR;
 
       gboolean strip_colorburst = (cr & (1 << 7)) > 0;
       gboolean alternate_colorburst = (cr & (1 << 2)) > 0;
-
-      float w = width;
-
-      // 341 is really 341⅓
-      if (width == 341)
-        w = 341 + 1.0 / 3.0;
 
       float cycle_length = w * 3.0 / 512.0;
 
@@ -998,7 +1000,7 @@ mednafen_core_run_frame (HsCore *core)
       }
     } else {
       if (hs_core_get_region (core) == HS_REGION_PAL) {
-        hs_software_context_set_colorburst (self->context, width * 3.0 / 640.0, 0.25, self->colorburst_offset);
+        hs_software_context_set_colorburst (self->context, w * 3.0 / 640.0, 0.25, self->colorburst_offset);
 
         if (mode != HS_INTERLACING_EVEN_FIELD) {
           if (self->colorburst_offset > 0.9)
@@ -1013,7 +1015,7 @@ mednafen_core_run_frame (HsCore *core)
           self->colorburst_offset += self->pal_v_phase;
         }
       } else {
-        hs_software_context_set_colorburst (self->context, width * 3.0 / 512.0, 0.5, self->colorburst_offset);
+        hs_software_context_set_colorburst (self->context, w * 3.0 / 512.0, 0.5, self->colorburst_offset);
 
         if (mode != HS_INTERLACING_EVEN_FIELD) {
           self->colorburst_offset += 0.5;
