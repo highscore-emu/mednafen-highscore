@@ -1015,7 +1015,9 @@ mednafen_core_run_frame (HsCore *core)
           self->colorburst_offset += self->pal_v_phase;
         }
       } else {
-        hs_software_context_set_colorburst (self->context, w * 3.0 / 512.0, 0.5, self->colorburst_offset);
+        float offset = (base_platform == HS_PLATFORM_SEGA_SATURN) ? 2.0 / 3.0 : 0.0;
+
+        hs_software_context_set_colorburst (self->context, w * 3.0 / 512.0, 0.5, self->colorburst_offset + offset);
 
         if (mode != HS_INTERLACING_EVEN_FIELD) {
           self->colorburst_offset += 0.5;
