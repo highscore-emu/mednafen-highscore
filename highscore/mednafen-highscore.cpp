@@ -998,6 +998,53 @@ mednafen_core_run_frame (HsCore *core)
         if (self->colorburst_offset > 0.9)
           self->colorburst_offset = 0;
       }
+    } else if (base_platform == HS_PLATFORM_PLAYSTATION) {
+      double line_length, cycle_length, lines, factor;
+
+      if (hs_core_get_region (core) == HS_REGION_PAL) {
+        line_length = 284.25;
+        cycle_length = 12.0;
+        lines = (mode == HS_INTERLACING_NONE) ? 314 : 625;
+      } else {
+        line_length = 227.5;
+        cycle_length = 15.0;
+        lines = (mode == HS_INTERLACING_NONE) ? 263 : 525;
+      }
+
+      if (width < 270)
+        factor = 10.0;
+      else if (width < 335)
+        factor = 8.0;
+      else if (width < 400)
+        factor = 7.0;
+      else if (width < 550)
+        factor = 5.0;
+      else
+        factor = 4.0;
+
+      cycle_length /= factor;
+
+      double line_offset = fmodf(line_length, 1.0);
+      double frame_offset = fmodf(line_length * lines, 1.0);
+
+      hs_software_context_set_colorburst (self->context, cycle_length, line_offset, self->colorburst_offset);
+
+      if (mode != HS_INTERLACING_EVEN_FIELD) {
+        if (self->colorburst_offset > 0.9)
+          self->colorburst_offset--;
+
+        self->colorburst_offset += frame_offset;
+
+        if (hs_core_get_region (core) == HS_REGION_PAL && mode != HS_INTERLACING_NONE)
+          self->pal_v_phase = (self->pal_v_phase + 1) % 2;
+        else
+          self->pal_v_phase = 0;
+
+        if (self->colorburst_offset > 0.9)
+          self->colorburst_offset--;
+
+        self->colorburst_offset += self->pal_v_phase;
+      }
     } else {
       if (hs_core_get_region (core) == HS_REGION_PAL) {
         hs_software_context_set_colorburst (self->context, w * 3.0 / 640.0, 0.25, self->colorburst_offset);
@@ -1015,9 +1062,7 @@ mednafen_core_run_frame (HsCore *core)
           self->colorburst_offset += self->pal_v_phase;
         }
       } else {
-        float offset = (base_platform == HS_PLATFORM_SEGA_SATURN) ? 2.0 / 3.0 : 0.0;
-
-        hs_software_context_set_colorburst (self->context, w * 3.0 / 512.0, 0.5, self->colorburst_offset + offset);
+        hs_software_context_set_colorburst (self->context, w * 3.0 / 512.0, 0.5, self->colorburst_offset + 2.0 / 3.0);
 
         if (mode != HS_INTERLACING_EVEN_FIELD) {
           self->colorburst_offset += 0.5;
